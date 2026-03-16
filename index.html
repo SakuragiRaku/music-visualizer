@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ミュージックビジュアライザー</title>
+  <meta name="description" content="スピーカーの音をリアルタイムに幾何学模様として可視化。音楽をもっと楽しく。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="visualizer"></canvas>
+
+  <!-- 開始画面 -->
+  <div class="start-screen" id="start-screen">
+    <div class="start-content">
+      <span class="start-icon">🎵</span>
+      <h1 class="start-title">ミュージックビジュアライザー</h1>
+      <p class="start-desc">スピーカーの音をリアルタイムに可視化します</p>
+      <button class="start-btn" id="start-btn">🎧 音声をキャプチャして開始</button>
+      <p class="start-hint">音楽を再生しているタブを選択してください</p>
+    </div>
+  </div>
+
+  <!-- コントロールパネル -->
+  <div class="controls" id="controls">
+    <!-- 音声制御 -->
+    <button class="ctrl-btn primary" id="toggle-btn" title="開始/停止 (Space)">
+      <span id="toggle-icon">▶</span>
+    </button>
+
+    <div class="ctrl-divider"></div>
+
+    <!-- モード切替 -->
+    <div class="ctrl-group">
+      <span class="ctrl-label">モード</span>
+      <div class="ctrl-pills" id="mode-pills">
+        <button class="pill active" data-mode="bars" title="バー (1)">▮▮▮</button>
+        <button class="pill" data-mode="wave" title="ウェーブ (2)">〰</button>
+        <button class="pill" data-mode="circle" title="サークル (3)">◎</button>
+        <button class="pill" data-mode="particles" title="パーティクル (4)">✦</button>
+        <button class="pill" data-mode="kaleidoscope" title="万華鏡 (5)">❖</button>
+      </div>
+    </div>
+
+    <div class="ctrl-divider"></div>
+
+    <!-- カラーテーマ -->
+    <div class="ctrl-group">
+      <span class="ctrl-label">カラー</span>
+      <div class="ctrl-pills" id="color-pills">
+        <button class="pill active" data-color="rainbow" title="レインボー (C)">🌈</button>
+        <button class="pill" data-color="neon" title="ネオン">💜</button>
+        <button class="pill" data-color="mono" title="モノクロ">⬜</button>
+        <button class="pill" data-color="ocean" title="オーシャン">🌊</button>
+      </div>
+    </div>
+
+    <div class="ctrl-divider"></div>
+
+    <!-- 感度 -->
+    <div class="ctrl-group">
+      <span class="ctrl-label">感度</span>
+      <input type="range" class="ctrl-slider" id="sensitivity" min="0.5" max="3" step="0.1" value="1.5" />
+    </div>
+
+    <!-- フルスクリーン -->
+    <button class="ctrl-btn" id="fullscreen-btn" title="フルスクリーン (F)">⛶</button>
+
+    <!-- 設定 -->
+    <button class="ctrl-btn" id="settings-btn" title="設定">⚙</button>
+  </div>
+
+  <!-- 設定パネル -->
+  <div class="settings-panel hidden" id="settings-panel">
+    <h3>⚙ 設定</h3>
+    <div class="setting-item">
+      <label>FFTサイズ (解像度)</label>
+      <select class="setting-select" id="fft-size">
+        <option value="512">低 (512)</option>
+        <option value="1024">中 (1024)</option>
+        <option value="2048" selected>高 (2048)</option>
+        <option value="4096">最高 (4096)</option>
+      </select>
+    </div>
+    <div class="setting-item">
+      <label>背景トレイル</label>
+      <input type="range" class="setting-slider" id="bg-alpha" min="0.01" max="1" step="0.01" value="0.15" />
+      <span class="setting-value" id="bg-alpha-value">0.15</span>
+    </div>
+    <div class="setting-item">
+      <button class="setting-close" id="settings-close">閉じる</button>
+    </div>
+  </div>
+
+  <!-- キーボードヒント -->
+  <div class="key-hint" id="key-hint">
+    Space: 開始/停止 | 1-5: モード | C: カラー | F: フルスクリーン
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
