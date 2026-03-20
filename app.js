@@ -88,14 +88,11 @@
         audio: true,
       });
 
-      // 映像トラックを背景動画に接続
+      // 映像トラックをvideo要素に接続（Canvas描画ソースとして使用）
       const videoTracks = stream.getVideoTracks();
-      if (videoTracks.length > 0 && settings.videoBg) {
-        const videoStream = new MediaStream(videoTracks);
-        bgVideo.srcObject = videoStream;
+      if (videoTracks.length > 0) {
+        bgVideo.srcObject = stream;
         bgVideo.play().catch(() => {});
-        bgVideo.classList.remove('hidden-video');
-        bgVideo.style.opacity = settings.videoOpacity;
       }
 
       const audioTracks = stream.getAudioTracks();
@@ -137,8 +134,8 @@
       audioContext.close().catch(() => {});
     }
     // 映像をクリーンアップ
+    bgVideo.pause();
     bgVideo.srcObject = null;
-    bgVideo.classList.add('hidden-video');
     source = null;
     stream = null;
     audioContext = null;
@@ -237,12 +234,18 @@
     const w = window.innerWidth;
     const h = window.innerHeight;
 
-    // 背景 (トレイル効果) - 映像背景時はclearRectで透過
-    if (settings.videoBg && bgVideo.srcObject) {
+    // 背景描画
+    if (settings.videoBg && bgVideo.srcObject && bgVideo.readyState >= 2) {
+      // 映像フレームをCanvasに直接描画
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = `rgba(0, 0, 0, ${Math.max(0.02, settings.bgAlpha * 0.3)})`;
+      ctx.globalAlpha = settings.videoOpacity;
+      ctx.drawImage(bgVideo, 0, 0, w, h);
+      ctx.globalAlpha = 1;
+      // 映像の上に半透明の暗いオーバーレイ
+      ctx.fillStyle = `rgba(0, 0, 0, ${0.1 + settings.bgAlpha * 0.3})`;
       ctx.fillRect(0, 0, w, h);
     } else {
+      // 通常の背景 (トレイル効果)
       ctx.fillStyle = `rgba(0, 0, 0, ${settings.bgAlpha})`;
       ctx.fillRect(0, 0, w, h);
     }
@@ -536,18 +539,6 @@
   videoToggle.addEventListener('click', () => {
     settings.videoBg = !settings.videoBg;
     videoToggle.classList.toggle('active', settings.videoBg);
-    if (settings.videoBg && stream) {
-      const videoTracks = stream.getVideoTracks();
-      if (videoTracks.length > 0) {
-        const videoStream = new MediaStream(videoTracks);
-        bgVideo.srcObject = videoStream;
-        bgVideo.play().catch(() => {});
-        bgVideo.classList.remove('hidden-video');
-        bgVideo.style.opacity = settings.videoOpacity;
-      }
-    } else {
-      bgVideo.classList.add('hidden-video');
-    }
     saveSettings();
   });
 
@@ -636,8 +627,6 @@
     bgAlphaValue.textContent = settings.bgAlpha.toFixed(2);
     videoToggle.classList.toggle('active', settings.videoBg);
     videoOpacitySlider.value = settings.videoOpacity;
-    bgVideo.style.opacity = settings.videoOpacity;
-    if (!settings.videoBg) bgVideo.classList.add('hidden-video');
   }
 
   restoreUI();
