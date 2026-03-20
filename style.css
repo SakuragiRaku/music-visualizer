@@ -14,12 +14,30 @@ body {
 
 body.show-cursor { cursor: default; }
 
+#bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  opacity: 0.4;
+  pointer-events: none;
+  background: #000;
+}
+
+#bg-video.hidden-video {
+  display: none;
+}
+
 #visualizer {
   display: block;
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
+  z-index: 2;
+  background: transparent;
 }
 
 /* --- 開始画面 --- */

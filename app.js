@@ -16,6 +16,8 @@
     fftSize: 2048,
     sensitivity: 1.5,
     bgAlpha: 0.15,
+    videoBg: true,
+    videoOpacity: 0.4,
   };
 
   function loadSettings() {
@@ -34,6 +36,7 @@
   // ============================================================
   const canvas = document.getElementById('visualizer');
   const ctx = canvas.getContext('2d');
+  const bgVideo = document.getElementById('bg-video');
   const startScreen = document.getElementById('start-screen');
   const startBtn = document.getElementById('start-btn');
   const controls = document.getElementById('controls');
@@ -49,6 +52,8 @@
   const bgAlphaSlider = document.getElementById('bg-alpha');
   const bgAlphaValue = document.getElementById('bg-alpha-value');
   const keyHint = document.getElementById('key-hint');
+  const videoToggle = document.getElementById('video-toggle');
+  const videoOpacitySlider = document.getElementById('video-opacity');
 
   // ============================================================
   // Canvas セットアップ
@@ -83,8 +88,15 @@
         audio: true,
       });
 
-      // 映像トラックは不要なので停止
-      stream.getVideoTracks().forEach(t => t.stop());
+      // 映像トラックを背景動画に接続
+      const videoTracks = stream.getVideoTracks();
+      if (videoTracks.length > 0 && settings.videoBg) {
+        const videoStream = new MediaStream(videoTracks);
+        bgVideo.srcObject = videoStream;
+        bgVideo.play().catch(() => {});
+        bgVideo.classList.remove('hidden-video');
+        bgVideo.style.opacity = settings.videoOpacity;
+      }
 
       const audioTracks = stream.getAudioTracks();
       if (audioTracks.length === 0) {
@@ -124,6 +136,9 @@
     if (audioContext && audioContext.state !== 'closed') {
       audioContext.close().catch(() => {});
     }
+    // 映像をクリーンアップ
+    bgVideo.srcObject = null;
+    bgVideo.classList.add('hidden-video');
     source = null;
     stream = null;
     audioContext = null;
@@ -222,9 +237,15 @@
     const w = window.innerWidth;
     const h = window.innerHeight;
 
-    // 背景 (トレイル効果)
-    ctx.fillStyle = `rgba(0, 0, 0, ${settings.bgAlpha})`;
-    ctx.fillRect(0, 0, w, h);
+    // 背景 (トレイル効果) - 映像背景時はclearRectで透過
+    if (settings.videoBg && bgVideo.srcObject) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = `rgba(0, 0, 0, ${Math.max(0.02, settings.bgAlpha * 0.3)})`;
+      ctx.fillRect(0, 0, w, h);
+    } else {
+      ctx.fillStyle = `rgba(0, 0, 0, ${settings.bgAlpha})`;
+      ctx.fillRect(0, 0, w, h);
+    }
 
     if (!isPlaying || !analyser) return;
 
@@ -511,6 +532,31 @@
     saveSettings();
   });
 
+  // --- 映像背景 ---
+  videoToggle.addEventListener('click', () => {
+    settings.videoBg = !settings.videoBg;
+    videoToggle.classList.toggle('active', settings.videoBg);
+    if (settings.videoBg && stream) {
+      const videoTracks = stream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        const videoStream = new MediaStream(videoTracks);
+        bgVideo.srcObject = videoStream;
+        bgVideo.play().catch(() => {});
+        bgVideo.classList.remove('hidden-video');
+        bgVideo.style.opacity = settings.videoOpacity;
+      }
+    } else {
+      bgVideo.classList.add('hidden-video');
+    }
+    saveSettings();
+  });
+
+  videoOpacitySlider.addEventListener('input', e => {
+    settings.videoOpacity = parseFloat(e.target.value);
+    bgVideo.style.opacity = settings.videoOpacity;
+    saveSettings();
+  });
+
   // --- UI 自動隠し ---
   let uiTimeout = null;
 
@@ -567,6 +613,9 @@
         saveSettings();
         break;
       }
+      case 'KeyV':
+        videoToggle.click();
+        break;
       case 'KeyF':
         toggleFullscreen();
         break;
@@ -585,6 +634,10 @@
     fftSelect.value = settings.fftSize;
     bgAlphaSlider.value = settings.bgAlpha;
     bgAlphaValue.textContent = settings.bgAlpha.toFixed(2);
+    videoToggle.classList.toggle('active', settings.videoBg);
+    videoOpacitySlider.value = settings.videoOpacity;
+    bgVideo.style.opacity = settings.videoOpacity;
+    if (!settings.videoBg) bgVideo.classList.add('hidden-video');
   }
 
   restoreUI();

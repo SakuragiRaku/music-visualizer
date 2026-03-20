@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <video id="bg-video" muted playsinline></video>
   <canvas id="visualizer"></canvas>
 
   <!-- 開始画面 -->
@@ -65,6 +66,15 @@
       <input type="range" class="ctrl-slider" id="sensitivity" min="0.5" max="3" step="0.1" value="1.5" />
     </div>
 
+    <!-- 映像背景 -->
+    <div class="ctrl-group">
+      <span class="ctrl-label">映像</span>
+      <button class="pill active" id="video-toggle" title="映像表示 ON/OFF (V)">📹</button>
+      <input type="range" class="ctrl-slider" id="video-opacity" min="0.05" max="1" step="0.05" value="0.4" title="映像の不透明度" />
+    </div>
+
+    <div class="ctrl-divider"></div>
+
     <!-- フルスクリーン -->
     <button class="ctrl-btn" id="fullscreen-btn" title="フルスクリーン (F)">⛶</button>
 
@@ -96,7 +106,7 @@
 
   <!-- キーボードヒント -->
   <div class="key-hint" id="key-hint">
-    Space: 開始/停止 | 1-5: モード | C: カラー | F: フルスクリーン
+    Space: 開始/停止 | 1-5: モード | C: カラー | V: 映像 | F: フルスクリーン
   </div>
 
   <script src="app.js"></script>
