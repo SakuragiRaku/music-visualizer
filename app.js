@@ -92,7 +92,12 @@
       const videoTracks = stream.getVideoTracks();
       if (videoTracks.length > 0) {
         bgVideo.srcObject = stream;
-        bgVideo.play().catch(() => {});
+        try {
+          await bgVideo.play();
+          console.log('映像再生開始 readyState:', bgVideo.readyState, 'videoWidth:', bgVideo.videoWidth, 'videoHeight:', bgVideo.videoHeight);
+        } catch (e) {
+          console.warn('映像の自動再生に失敗:', e);
+        }
       }
 
       const audioTracks = stream.getAudioTracks();
