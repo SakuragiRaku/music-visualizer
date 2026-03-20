@@ -84,8 +84,11 @@
   async function startCapture() {
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
+        video: { displaySurface: 'browser' },
         audio: true,
+        monitorTypeSurfaces: 'exclude',
+        surfaceSwitching: 'exclude',
+        selfBrowserSurface: 'exclude',
       });
 
       // 映像トラックをvideo要素に接続（Canvas描画ソースとして使用）
